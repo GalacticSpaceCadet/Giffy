@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Giphy!</title>
+    <link rel="stylesheet" type="text/css" href="giffy.css">
+</head>
+
+<body>
+<header>Giffy World</header>
+    <div id="showTheButt">
+    </div>
+   
+        <form>
+            <strong>Pick a GIF </strong>
+            <input id="search" type="text" name="searchbar">
+            <br>
+            <input id="submit" type="submit" value="Submit">
+        </form>
+    <div id="showMeTheGiffy">
+    </div>
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript">
+    
+    var topics = ["Star Wars","Battle Star","Star Trek","Buffy"];
+
+
+
+
+    $(function() {
+        //this submit button 
+        createButt();
+
+        $("#submit").on("click", function(e) {
+            e.preventDefault();
+            var looking = $("#search").val().trim();
+            topics.push(looking);
+            createButt();
+
+        });
+
+        function createButt() {
+            $("#showTheButt").empty();
+            for (var i = 0; i < topics.length; i++) {
+                var btn = $("<button class='btn'>").text(topics[i]);
+                btn.attr("data-topics", topics[i]);
+                $("#showTheButt").append(btn);
+            }
+
+
+
+        }
+        function returnedGifs() {
+
+            $("#showMeTheGiffy").empty();
+            var topic = $(this).attr("data-topics");
+
+            var queryURL = "http://api.giphy.com/v1/gifs/search?q=" +
+                topic + "&api_key=dc6zaTOxFJmzC&limit=20";
+
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+
+            .done(function(response) {
+                var results = response.data;
+                for (var i = 0; i < results.length; i++) {
+
+
+                    var giffyDiv = $("<div>");
+                    var p = $("<p>");
+                    p.html("rating: " + results[i].rating);
+                    var giffyImage = $("<img>");
+
+                    giffyImage.addClass("gifImage");
+                    giffyImage.attr("src", results[i].images.fixed_height_still.url);
+                    giffyImage.attr("data-state", "still");
+                    giffyImage.attr("data-still", results[i].images.fixed_height_still.url);
+                    giffyImage.attr("data-animate", results[i].images.fixed_height.url);
+           			giffyDiv.append(p);
+                    giffyDiv.append(giffyImage);
+                    
+                    $("#showMeTheGiffy").append(giffyDiv);
+
+
+
+                }
+            });
+        }
+        $("#showMeTheGiffy").on("click", ".gifImage", function() {
+            if ($(this).attr("data-state") === "still") {
+                $(this).attr("src", $(this).attr("data-animate"));
+                $(this).attr("data-state", "animate");
+            } else {
+                $(this).attr("src", $(this).attr("data-still"));
+                $(this).attr("data-state", "still");
+
+            }
+        });
+
+        $(document).on("click", ".btn", returnedGifs);
+    });
+    </script>
+</body>
+
+</html>
